@@ -1,20 +1,25 @@
-FROM		debian:buster
+#the image set is the penultime stable version of debian
+FROM debian:bullseye
 
-RUN			apt-get update && apt-get install -y \
-			nginx \
-			vim \
-			openssl \
-			procps \
-			&& mkdir /etc/nginx/ssl \
-			&& openssl req -newkey rsa:4096 -x509 -sha256 -days 365 -nodes \
-			-out /etc/nginx/ssl/inception.crt \
-			-keyout /etc/nginx/ssl/inception.key \
-			-subj "/C=BR/ST=SaoPaulo/L=SaoPaulo/O=42SP/OU=feralves/CN=feralves.42.fr"
+#The RUN instruction executes the commands
+#in here we are installing nginx and openssl
+RUN apt-get update && apt-get upgrade -y && apt-get install -y nginx openssl && \
+	rm -rf /var/lib/apt/lists/*
 
-COPY		./conf/nginx.conf /etc/nginx/conf.d/default.conf
+#now we make nginx SSL to be able to run
+RUN mkdir /etc/nginx/ssl
+RUN openssl req -newkey rsa:4096 -x509 -sha256 -days 365 -nodes \
+       -out /etc/nginx/ssl/inception.crt -keyout /etc/nginx/ssl/inception.key \
+       -subj "/C=42/ST=SP/L=SP/O=Global Security/OU=Inception/CN=feralves.42.fr"
 
-RUN			mkdir -p /run/nginx
+#the only port availabe according to the subject
+EXPOSE 443
 
-EXPOSE		443
+#copies the Nginx configuration file nginx.conf to the /etc/nginx/conf.d/
+COPY ./conf/nginx.conf ./etc/nginx/conf.d/
 
-CMD			["nginx", "-g", "daemon off;"]
+# nginx config
+RUN mkdir -p /run/nginx
+
+#The CMD instruction specifies the default command to run when the container is started
+CMD ["nginx", "-g", "daemon off;"]
