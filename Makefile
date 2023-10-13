@@ -21,8 +21,10 @@ up:
 	docker compose --file=$(COMPOSE) up --build --detach
 
 build:
+	sudo mkdir -p $(VOLUMES_PATH)/mysql
+	docker volume create --name mariadb_volume --opt type=none --opt device=$(VOLUMES_PATH)/mysql --opt o=bind
 	sudo mkdir -p $(VOLUMES_PATH)/wordpress
-	sudo mkdir -p $(VOLUMES_PATH)/mariadb
+	docker volume create --name wordpress_volume --opt type=none --opt device=$(VOLUMES_PATH)/wordpress --opt o=bind
 
 hosts:
 	@if [ "${DOMAIN}" = "${LOOKDOMAIN}" ]; then \
@@ -42,11 +44,11 @@ down:
 config:
 	docker compose --file=$(COMPOSE) config
 
-fprune:
-	docker system prune --all --force --volumes
 
 fclean: down
-	sudo mv ./hosts_bkp /etc/hosts || echo "hosts_bkp does not exist"
-	sudo rm -rf /home/$(LOGIN)/data
+	sudo rm -rf $(VOLUMES_PATH)/wordpress
+	sudo rm -rf $(VOLUMES_PATH)/mariadb
+	docker system prune --all --force --volumes
+	# sudo mv ./hosts_bkp /etc/hosts || echo "hosts_bkp does not exist"
 
 re: fclean all

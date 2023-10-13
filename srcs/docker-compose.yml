@@ -3,9 +3,9 @@ version: "3"
 services:
   nginx:
     container_name: nginx
+    build: ./requirements/nginx
     depends_on:
       - wordpress
-    build: ./requirements/nginx
     ports:
       - 443:443
     volumes:
@@ -15,18 +15,18 @@ services:
       - inception-network
 
   wordpress:
+    container_name: wordpress
+    build: ./requirements/wordpress
     depends_on:
       - mariadb
-    build: ./requirements/wordpress
     image: wordpress
-    container_name: wordpress
     env_file:
       - .env
     environment:
-      - MYSQL_HOSTNAME=${MYSQL_HOSTNAME}
-      - MYSQL_DATABASE=${MYSQL_DATABASE}
-      - MYSQL_USER=${MYSQL_USER}
-      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - WORDPRESS_DB_HOST=${WORDPRESS_DB_HOST}
+      - WORDPRESS_DB_NAME=${WORDPRESS_DB_NAME}
+      - WORDPRESS_DB_USER=${WORDPRESS_DB_USER}
+      - WORDPRESS_DB_PASSWORD=${WORDPRESS_DB_PASSWORD}
     volumes:
       - wordpress_volume:/var/www/feralves/wordpress
     restart: unless-stopped
@@ -34,21 +34,20 @@ services:
       - inception-network
 
   mariadb:
+    container_name: mariadb
     build: ./requirements/mariadb
     image: mariadb
-    container_name: mariadb
     env_file:
       - .env
     environment:
-      - MYSQL_DATABASE=${MYSQL_DATABASE}
-      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
-      - MYSQL_USER=${MYSQL_USER}
-      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - WORDPRESS_DB_NAME=${WORDPRESS_DB_NAME}
+      - WORDPRESS_DB_USER=${WORDPRESS_DB_USER}
+      - WORDPRESS_DB_PASSWORD=${WORDPRESS_DB_PASSWORD}
+    volumes:
+      - mariadb_volume:/var/lib/mariadb
+    restart: unless-stopped
     networks:
       - inception-network
-    volumes:
-      - mariadb_volume:/var/lib/mysql
-    restart: unless-stopped
 
 volumes:
   mariadb_volume:
