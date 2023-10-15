@@ -8,6 +8,11 @@ export VOLUMES_PATH # Make it available for the Dockerfiles
 
 all: srcs/.env hosts build up
 
+#needed to run the project
+# update-env:
+#     sudo apt-get update && sudo apt-get upgrade -y
+#     sudo apt-get install docker-compose-plugin
+
 list:
 	docker ps -a
 
@@ -44,11 +49,12 @@ down:
 config:
 	docker compose --file=$(COMPOSE) config
 
-
 fclean: down
-	sudo rm -rf $(VOLUMES_PATH)/wordpress
-	sudo rm -rf $(VOLUMES_PATH)/mariadb
 	docker system prune --all --force --volumes
-	# sudo mv ./hosts_bkp /etc/hosts || echo "hosts_bkp does not exist"
+	sudo rm -rf $(VOLUMES_PATH)/wordpress
+	docker volume rm wordpress_volume 
+	sudo rm -rf $(VOLUMES_PATH)/mariadb
+	docker volume rm mariadb_volume 
+	@sudo mv ./hosts_bkp /etc/hosts || echo "hosts_bkp does not exist"
 
 re: fclean all

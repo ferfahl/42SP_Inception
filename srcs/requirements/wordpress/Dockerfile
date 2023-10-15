@@ -1,81 +1,32 @@
-#the image set is the penultime stable version of debian
-FROM debian:bullseye
+FROM 		debian:bullseye
 
-# FROM debian:buster
+STOPSIGNAL SIGTERM
 
-# RUN apt-get update && apt-get -y install \
-# 	wget \
-# 	apt-utils \
-# 	vim \
-# 	php7.3 \
-# 	php7.3-fpm \
-# 	php7.3-opcache \
-# 	php7.3-cli \
-# 	php7.3-gd \
-# 	php7.3-curl \
-# 	php7.3-mysql \
-# 	php7.3-mbstring
+#1) INSTALL VIM, WGET AND PHP-FPM AND PHP-MYSQL;
+RUN			apt-get update \
+			&& apt-get install -y apt-utils vim wget \
+			php7.4 \
+			php7.4-fpm \
+			php7.4-mysql \
+			&& mkdir /run/php
 
-# RUN mkdir /run/php && \
-# 	mkdir -p /var/www/feralves && \
-# 	wget https://wordpress.org/latest.tar.gz && \
-# 	tar -xzvf latest.tar.gz && \
-# 	rm latest.tar.gz && \
-# 	mv wordpress /var/www/feralves/wordpress
+#2) SET PHP-FPM TO LISTEM PACKED FROM NETWORK IN PORT 9000;
+COPY		conf/www.conf /etc/php/7.4/fpm/pool.d/www.conf
 
-# COPY conf/ /srcs/
-# COPY tools/ /usr/local/bin/
+#3) DOWNLOAD WORDPRESS AND MOVE IT TO VOLUME
+RUN			chmod 777 /etc/php/7.4/fpm/pool.d/www.conf \
+			&& mkdir -p /var/www/feralves \
+			&& wget https://wordpress.org/latest.tar.gz \
+			&& tar xzvf latest.tar.gz \
+			&& mv -f wordpress /var/www/feralves
 
-# RUN chmod +x /usr/local/bin/start_wordpress.sh
+EXPOSE		9000
 
-# RUN cp /srcs/www.conf /etc/php/7.3/fpm/pool.d/
+#4) SET THE CONTAINER INITIAL DIRECTORY
+WORKDIR		/var/www/feralves/wordpress/
 
-# WORKDIR /var/www/feralves/wordpress
-
-# ENTRYPOINT ["/usr/local/bin/start_wordpress.sh"]
-
-# EXPOSE 9000
-
-# CMD ["/usr/sbin/php-fpm7.3", "--nodaemonize"]
-
-WORKDIR /var/www/html/
-
-RUN apt update -y && apt upgrade && apt install -y \
-	php-fpm \
-	php-mysql \
-	mariadb-client \
-	wget \
-	sudo
-
-RUN sed -i.default "/^listen\s=.*/c\listen = 0.0.0.0:9000" \
-	/etc/php/[0-9]*.[0-9]*/fpm/pool.d/www.conf
-
-COPY ./tools/wp_install.sh /tmp/wp_install.sh
-
-RUN	wget https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar && chmod +x wp-cli.phar && mv wp-cli.phar /usr/bin/wp
-
-WORKDIR	/var/www/html/wordpress
-
-RUN	mkdir -p /run/php
-
-CMD ["sh", "/tmp/wp_install.sh"]
-
-# ARG MYSQL_PASSWORD
-
-# RUN apt update -y && apt upgrade -y && apt install -y curl \
-# 	php-fpm \
-# 	php-mysql \
-# 	mariadb-client -y \
-# 	wget
-# RUN curl -O https://wordpress.org/latest.tar.gz
-# RUN tar xvf latest.tar.gz
-# RUN mkdir -p /var/www/html
-# RUN mv wordpress /var/www/html/
-# RUN chown -R www-data:www-data /var/www/html/wordpress
-# RUN chmod -R 0777 /var/www/html/wordpress/wp-content/
-# COPY ./tools/www.conf /etc/php/7.3/fpm/pool.d/
-# COPY ./tools/wp-config.php /var/www/html/wordpress
-# RUN sed -i "s/password_here/$MYSQL_PASSWORD/g" /var/www/html/wordpress/wp-config.php
-# RUN mkdir /run/php
-# EXPOSE 9000
-# CMD ["/usr/sbin/php-fpm7.3", "--nodaemonize"]
+#5) EXECUTE THE SCRIPT TO FILL WP_CONFIG.PHP WITH DATABASE USERNAME, LOGIN, HOST, DATABASE ETC AND
+#   EXECUTE PHP-FPM SERVICE IN NO DAEMON MODE, LOCKING TERMINAL, AVOIDING CONTAINER EXIT
+COPY		tools/init_wordpress.sh /
+RUN			chmod 777 /init_wordpress.sh
+ENTRYPOINT sh /init_wordpress.sh && /usr/sbin/php-fpm7.4 --nodaemonize

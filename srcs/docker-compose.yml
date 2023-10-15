@@ -16,17 +16,19 @@ services:
 
   wordpress:
     container_name: wordpress
-    build: ./requirements/wordpress
+    build:
+      context: ./requirements/wordpress/
+    environment:
+      - MYSQL_HOST
+      - MYSQL_DATABASE
+      - MYSQL_USER
+      - MYSQL_PASSWORD
+      - WP_HOSTNAME
     depends_on:
       - mariadb
     image: wordpress
     env_file:
       - .env
-    environment:
-      - WORDPRESS_DB_HOST=${WORDPRESS_DB_HOST}
-      - WORDPRESS_DB_NAME=${WORDPRESS_DB_NAME}
-      - WORDPRESS_DB_USER=${WORDPRESS_DB_USER}
-      - WORDPRESS_DB_PASSWORD=${WORDPRESS_DB_PASSWORD}
     volumes:
       - wordpress_volume:/var/www/feralves/wordpress
     restart: unless-stopped
@@ -35,14 +37,17 @@ services:
 
   mariadb:
     container_name: mariadb
-    build: ./requirements/mariadb
+    build:
+      context: ./requirements/mariadb/
+      args:
+        - MYSQL_DATABASE
+        - MYSQL_ROOT
+        - MYSQL_ROOT_PASSWORD
+        - MYSQL_USER
+        - MYSQL_PASSWORD
     image: mariadb
     env_file:
       - .env
-    environment:
-      - WORDPRESS_DB_NAME=${WORDPRESS_DB_NAME}
-      - WORDPRESS_DB_USER=${WORDPRESS_DB_USER}
-      - WORDPRESS_DB_PASSWORD=${WORDPRESS_DB_PASSWORD}
     volumes:
       - mariadb_volume:/var/lib/mariadb
     restart: unless-stopped

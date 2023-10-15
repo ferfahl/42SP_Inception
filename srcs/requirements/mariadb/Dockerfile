@@ -1,53 +1,32 @@
-FROM debian:oldstable
+FROM debian:buster
 
-ARG WORDPRESS_DB_NAME
-ARG WORDPRESS_DB_USER
-ARG WORDPRESS_DB_PASSWORD
+ARG MYSQL_DATABASE
+ARG MYSQL_ROOT
+ARG MYSQL_ROOT_PASSWORD
+ARG MYSQL_USER
+ARG MYSQL_PASSWORD
 
-RUN apt update -y && apt upgrade && apt install mariadb-server -y
+RUN apt update
 
-RUN echo "[mysqld] \n\
-skip-networking=0 \n\
-skip-bind-address" >> /etc/mysql/my.cnf
+RUN apt install mariadb-server mariadb-client procps -y
 
-# RUN service mariadb start && \
-# 	mariadb -u root -e \
-# 	"CREATE DATABASE IF NOT EXISTS $WORDPRESS_DB_NAME; \
-# 	CREATE USER '$WORDPRESS_DB_USER'@'%' identified by '$WORDPRESS_DB_PASSWORD'; \
-# 	GRANT ALL ON wordpress_db.* TO '$WORDPRESS_DB_USER'@'%' IDENTIFIED BY '$WORDPRESS_DB_PASSWORD'; \
-# 	FLUSH PRIVILEGES;" && \
-# 	service mariadb stop
+RUN mkdir -p /var/lib/mysql /var/run/mysqld && \
+	chown -R mysql:mysql /var/lib/mysql /var/run/mysqld && \
+	chmod 777 /var/run/mysqld
 
-CMD ["mysqld_safe"]
+	# Allow mysql to communicate with wordpress in the network
+RUN rm /etc/mysql/mariadb.conf.d/50-server.cnf
+COPY ./conf/50-server.cnf /etc/mysql/mariadb.conf.d/
+RUN chmod 644 /etc/mysql/mariadb.conf.d/50-server.cnf
 
-# #the image set is the penultime stable version of debian
-# FROM debian:bullseye
+RUN echo "\n[mariadb]\nbind-address=0.0.0.0\nport=3306\n" >>/etc/mysql/my.cnf
 
-# #The RUN instruction executes the commands
-# #in here we are installing mariadb server and client and vim
-# RUN apt-get update && apt-get upgrade -y 
-# RUN apt-get install -y mariadb-server \
-#     mariadb-client vim \
-#     && rm -rf /var/lib/apt/lists/*
+COPY tools /tmp/
 
-# # Allow mysqld daemon to run, purge and recreate /var/lib/mysql with appropriate ownership
-# # Ensure /var/run/mysqld is writable regardless of UID of mysqld at runtime
-# RUN mkdir -p /var/run/mysqld \
-#     && chown -R mysql:mysql /var/run/mysqld \
-#     && chmod 777 /var/run/mysqld
+RUN chmod a+x /tmp/setup.sh
 
-# # Expose port 3306 (default port for MariaDB)
-# EXPOSE 3306
+RUN /tmp/setup.sh
 
-# # Copy shell script that sets up MariaDB database and user accounts
-# COPY ./tools/start_db.sh /usr/local/bin/
-# COPY ./conf/wordpress.sql /usr/local/bin/
+EXPOSE 3306
 
-# # Set permissions for the script to be executable
-# RUN chmod +x /usr/local/bin/start_db.sh
-# RUN chmod +x /usr/local/bin/wordpress.sql
-
-# ENTRYPOINT [ "/usr/local/bin/start_db.sh" ]
-
-# #Command to launch mariadb and enable the database to listen globally - also can be put on mysqldump.cnf file
-# CMD ["mysqld", "--bind-address=0.0.0.0"]
+ENTRYPOINT ["mysqld_safe"]
