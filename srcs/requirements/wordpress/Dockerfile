@@ -28,8 +28,6 @@ WORKDIR		/var/www/feralves/wordpress/
 
 #5) EXECUTE THE SCRIPT TO FILL WP_CONFIG.PHP WITH DATABASE USERNAME, LOGIN, HOST, DATABASE ETC AND
 #   EXECUTE PHP-FPM SERVICE IN NO DAEMON MODE, LOCKING TERMINAL, AVOIDING CONTAINER EXIT
-COPY		conf/wp-config.php .
-RUN			chmod 777 wp-config.php
 
 COPY		tools/wp_install.sh .
 RUN			chmod 777 wp_install.sh

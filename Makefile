@@ -52,7 +52,7 @@ config:
 fclean: down
 	docker system prune --all --force --volumes
 	sudo rm -rf $(VOLUMES_PATH)/wordpress
-	sudo rm -rf $(VOLUMES_PATH)/mariadb
+	sudo rm -rf $(VOLUMES_PATH)/mysql
 	docker volume rm mariadb_volume 
 	docker volume rm wordpress_volume 
 	@sudo mv ./hosts_bkp /etc/hosts || echo "hosts_bkp does not exist"
