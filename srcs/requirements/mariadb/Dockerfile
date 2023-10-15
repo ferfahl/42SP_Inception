@@ -14,7 +14,7 @@ RUN mkdir -p /var/lib/mysql /var/run/mysqld && \
 	chown -R mysql:mysql /var/lib/mysql /var/run/mysqld && \
 	chmod 777 /var/run/mysqld
 
-	# Allow mysql to communicate with wordpress in the network
+# Allow mysql to communicate with wordpress in the network
 RUN rm /etc/mysql/mariadb.conf.d/50-server.cnf
 COPY ./conf/50-server.cnf /etc/mysql/mariadb.conf.d/
 RUN chmod 644 /etc/mysql/mariadb.conf.d/50-server.cnf
