@@ -6,7 +6,7 @@ ARG		DOMAIN_NAME
 ARG		CERTS_CRT
 ARG		CERTS_KEY
 
-#updates and upgrades the apt-get
+#updates the package lists
 RUN		apt-get update && apt-get upgrade -y
 
 #installing nginx and openssl

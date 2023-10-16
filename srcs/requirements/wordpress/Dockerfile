@@ -13,7 +13,7 @@ ARG			WORDPRESS_ADMIN_USER
 ARG			WORDPRESS_ADMIN_PASSWORD
 ARG			WORDPRESS_ADMIN_EMAIL
 
-#updates the apt-get
+#updates the package lists
 RUN			apt-get update
 
 #install all the needed programs for the wordpress to work (specially php and mariadb-client)
@@ -34,7 +34,7 @@ RUN			wget https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.
 			&& chmod +x wp-cli.phar \
 			&& mv wp-cli.phar /usr/bin/wp
 
-#the only port available
+#exposes port 9000, which is the default port used by PHP-FPM
 EXPOSE		9000
 
 #set the container initial directory
@@ -44,5 +44,5 @@ WORKDIR		/var/www/html/wordpress
 COPY		tools/wp_install.sh .
 RUN			chmod 777 wp_install.sh
 
-#Sets the entrypoint for the docker
+#Sets the entrypoint for the container to the wp_install.sh script
 ENTRYPOINT ["sh", "wp_install.sh"]

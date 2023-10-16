@@ -8,13 +8,13 @@ ARG			MYSQL_ROOT_PASSWORD
 ARG			MYSQL_USER
 ARG			MYSQL_PASSWORD
 
-#updates the apt
+#updates the package lists
 RUN			apt update
 
 #install mariadb and necessary for it to work
 RUN			apt install mariadb-server mariadb-client procps -y
 
-#creates and modify the access rights to the folders that will be used
+#allow mysqld daemon to run, purge and recreate /var/lib/mysql with appropriate ownership
 RUN			mkdir -p /var/lib/mysql /var/run/mysqld && \
 			chown -R mysql:mysql /var/lib/mysql /var/run/mysqld && \
 			chmod 777 /var/run/mysqld
@@ -34,7 +34,7 @@ RUN			chmod a+x /tmp/setup.sh
 #runs the script to setup the mariadb inside the container
 RUN			/tmp/setup.sh
 
-#the only port available
+#exposes the 3306 port (default port for MariaDB)
 EXPOSE		3306
 
 #Sets the entrypoint for the docker
