@@ -6,9 +6,9 @@ services:
     build: 
       context: ./requirements/nginx
       args:
-      - DOMAIN_NAME
-      - CERTS_CRT
-      - CERTS_KEY
+        - DOMAIN_NAME
+        - CERTS_CRT
+        - CERTS_KEY
     depends_on:
       - wordpress
     ports:
