@@ -10,7 +10,7 @@ services:
       - 443:443
     volumes:
       - wordpress_volume:/var/www/html/wordpress
-    restart: unless-stopped
+    restart: always
     networks:
       - inception-network
 
@@ -18,22 +18,17 @@ services:
     container_name: wordpress
     build:
       context: ./requirements/wordpress/
-    environment:
-      - MYSQL_HOST
-      - MYSQL_DATABASE
-      - MYSQL_USER
-      - MYSQL_PASSWORD
-      - WP_HOSTNAME
-      - WORDPRESS_DB_HOST
-      - WORDPRESS_DB_NAME
-      - WORDPRESS_URL
-      - WORDPRESS_GUEST_USER
-      - WORDPRESS_GUEST_PASSWORD
-      - WORDPRESS_DB_USER
-      - WORDPRESS_DB_PASSWORD
-      - WORDPRESS_ADMIN_USER
-      - WORDPRESS_ADMIN_PASSWORD
-      - WORDPRESS_ADMIN_EMAIL
+      args:
+        - WORDPRESS_DB_HOST
+        - WORDPRESS_DB_NAME
+        - WORDPRESS_URL
+        - WORDPRESS_GUEST_USER
+        - WORDPRESS_GUEST_PASSWORD
+        - WORDPRESS_DB_USER
+        - WORDPRESS_DB_PASSWORD
+        - WORDPRESS_ADMIN_USER
+        - WORDPRESS_ADMIN_PASSWORD
+        - WORDPRESS_ADMIN_EMAIL
     depends_on:
       - mariadb
     image: wordpress
@@ -41,7 +36,7 @@ services:
       - .env
     volumes:
       - wordpress_volume:/var/www/html/wordpress
-    restart: unless-stopped
+    restart: always
     networks:
       - inception-network
 
@@ -55,22 +50,12 @@ services:
         - MYSQL_ROOT_PASSWORD
         - MYSQL_USER
         - MYSQL_PASSWORD
-        - WORDPRESS_DB_HOST
-        - WORDPRESS_DB_NAME
-        - WORDPRESS_URL
-        - WORDPRESS_GUEST_USER
-        - WORDPRESS_GUEST_PASSWORD
-        - WORDPRESS_DB_USER
-        - WORDPRESS_DB_PASSWORD
-        - WORDPRESS_ADMIN_USER
-        - WORDPRESS_ADMIN_PASSWORD
-        - WORDPRESS_ADMIN_EMAIL
     image: mariadb
     env_file:
       - .env
     volumes:
       - mariadb_volume:/var/lib/mysql/
-    restart: unless-stopped
+    restart: always
     networks:
       - inception-network
 

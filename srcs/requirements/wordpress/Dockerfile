@@ -1,8 +1,19 @@
+#the image set is the penultime stable version of debian
 FROM 		debian:bullseye
 
-STOPSIGNAL SIGTERM
+#the args that are needed from the .env file
+ARG			WORDPRESS_DB_HOST
+ARG			WORDPRESS_DB_NAME
+ARG			WORDPRESS_URL
+ARG			WORDPRESS_GUEST_USER
+ARG			WORDPRESS_GUEST_PASSWORD
+ARG			WORDPRESS_DB_USER
+ARG			WORDPRESS_DB_PASSWORD
+ARG			WORDPRESS_ADMIN_USER
+ARG			WORDPRESS_ADMIN_PASSWORD
+ARG			WORDPRESS_ADMIN_EMAIL
 
-#1) INSTALL VIM, WGET AND PHP-FPM AND PHP-MYSQL;
+#install all the needed programs for the wordpress to work (specially php and mariadb-client)
 RUN			apt-get update \
 			&& apt-get install -y apt-utils vim wget \
 			php7.4 \
@@ -13,23 +24,22 @@ RUN			apt-get update \
 			sudo \
 			&& mkdir /run/php
 
-#2) SET PHP-FPM TO LISTEM PACKED FROM NETWORK IN PORT 9000;
+#set php-fm to listen through port 9000
 COPY		conf/www.conf /etc/php/7.4/fpm/pool.d/www.conf
 
-#3) DOWNLOAD WP-CLI AND MOVE IT TO VOLUME
+#download wp-cli and moves it to a folder inside the container
 RUN			wget https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar  \
 			&& chmod +x wp-cli.phar \
 			&& mv wp-cli.phar /usr/bin/wp
 
 EXPOSE		9000
 
-#4) SET THE CONTAINER INITIAL DIRECTORY
+#set the container initial directory
 WORKDIR		/var/www/html/wordpress
 
-#5) EXECUTE THE SCRIPT TO FILL WP_CONFIG.PHP WITH DATABASE USERNAME, LOGIN, HOST, DATABASE ETC AND
-#   EXECUTE PHP-FPM SERVICE IN NO DAEMON MODE, LOCKING TERMINAL, AVOIDING CONTAINER EXIT
-
+#Copies the script for the installation of wordpress
 COPY		tools/wp_install.sh .
 RUN			chmod 777 wp_install.sh
 
+#Sets the entrypoint for the docker
 ENTRYPOINT ["sh", "wp_install.sh"]
