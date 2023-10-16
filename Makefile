@@ -9,9 +9,10 @@ export VOLUMES_PATH # Make it available for the Dockerfiles
 all: srcs/.env hosts build up
 
 #needed to run the project
-# update-env:
-#     sudo apt-get update && sudo apt-get upgrade -y
-#     sudo apt-get install docker-compose-plugin
+update-env:
+	sudo apt-get update
+	sudo apt-get upgrade -y
+	sudo apt-get install docker-compose-plugin
 
 list:
 	docker ps -a

@@ -3,7 +3,12 @@ version: "3"
 services:
   nginx:
     container_name: nginx
-    build: ./requirements/nginx
+    build: 
+      context: ./requirements/nginx
+      args:
+      - DOMAIN_NAME
+      - CERTS_CRT
+      - CERTS_KEY
     depends_on:
       - wordpress
     ports:
