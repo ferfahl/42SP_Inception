@@ -6,8 +6,11 @@ ARG		DOMAIN_NAME
 ARG		CERTS_CRT
 ARG		CERTS_KEY
 
+#updates and upgrades the apt-get
+RUN		apt-get update && apt-get upgrade -y
+
 #installing nginx and openssl
-RUN		apt-get update && apt-get upgrade -y && apt-get install -y nginx \
+RUN		apt-get install -y nginx \
 		openssl gettext-base && \
 		rm -rf /var/lib/apt/lists/*
 
@@ -15,16 +18,18 @@ RUN		apt-get update && apt-get upgrade -y && apt-get install -y nginx \
 RUN		mkdir /etc/nginx/ssl
 RUN		openssl req -newkey rsa:4096 -x509 -sha256 -days 365 -nodes \
 		-out $CERTS_CRT -keyout $CERTS_KEY \
-		-subj "/C=42/ST=SP/L=SP/O=Global Security/OU=Inception/CN=feralves.42.fr"
+		-subj "/C=42/ST=SP/L=SP/O=Global Security/OU=Inception/CN=$DOMAIN_NAME"
 
 #the only port availabe according to the subject
 EXPOSE	443
 
-#copies the Nginx configuration file nginx.conf to the /etc/nginx/conf.d/
-COPY	./conf/default.template ./etc/nginx/conf.d/
+#copies the Nginx configuration file to the /etc/nginx/conf.d/nginx.conf
+COPY	./conf/default.template ./etc/nginx/conf.d/nginx.conf
 
 #changes the enviroment arguments to whatever is on the .env
-RUN		envsubst < /etc/nginx/conf.d/default.template > /etc/nginx/conf.d/nginx.conf
+RUN 	sed -i "s#CERTS_KEY#$CERTS_KEY#" /etc/nginx/conf.d/nginx.conf && \
+		sed -i "s#CERTS_CRT#$CERTS_CRT#" /etc/nginx/conf.d/nginx.conf && \
+		sed -i "s#DOMAIN_NAME#$DOMAIN_NAME#" /etc/nginx/conf.d/nginx.conf
 
 #nginx config folder
 RUN		mkdir -p /run/nginx

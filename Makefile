@@ -47,11 +47,10 @@ srcs/.env:
 down:
 	docker compose --file=$(COMPOSE) down -v --rmi all --remove-orphans
 
-config:
-	docker compose --file=$(COMPOSE) config
-
-fclean: down
+clean: down
 	docker system prune --all --force --volumes
+
+fclean: clean
 	sudo rm -rf $(VOLUMES_PATH)/wordpress
 	sudo rm -rf $(VOLUMES_PATH)/mysql
 	docker volume rm mariadb_volume 

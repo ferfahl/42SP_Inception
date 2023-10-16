@@ -13,9 +13,11 @@ ARG			WORDPRESS_ADMIN_USER
 ARG			WORDPRESS_ADMIN_PASSWORD
 ARG			WORDPRESS_ADMIN_EMAIL
 
+#updates the apt-get
+RUN			apt-get update
+
 #install all the needed programs for the wordpress to work (specially php and mariadb-client)
-RUN			apt-get update \
-			&& apt-get install -y apt-utils vim wget \
+RUN			apt-get install -y apt-utils vim wget \
 			php7.4 \
 			php7.4-fpm \
 			php7.4-mysql \
@@ -32,6 +34,7 @@ RUN			wget https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.
 			&& chmod +x wp-cli.phar \
 			&& mv wp-cli.phar /usr/bin/wp
 
+#the only port available
 EXPOSE		9000
 
 #set the container initial directory
