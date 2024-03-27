@@ -26,11 +26,6 @@ EXPOSE	443
 #copies the Nginx configuration file to the /etc/nginx/conf.d/nginx.conf
 COPY	./conf/default.template ./etc/nginx/conf.d/nginx.conf
 
-#changes the enviroment arguments to whatever is on the .env
-RUN 	sed -i "s#CERTS_KEY#$CERTS_KEY#" /etc/nginx/conf.d/nginx.conf && \
-		sed -i "s#CERTS_CRT#$CERTS_CRT#" /etc/nginx/conf.d/nginx.conf && \
-		sed -i "s#DOMAIN_NAME#$DOMAIN_NAME#" /etc/nginx/conf.d/nginx.conf
-
 #nginx config folder
 RUN		mkdir -p /run/nginx
 
